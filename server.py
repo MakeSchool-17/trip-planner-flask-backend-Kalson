@@ -15,23 +15,21 @@ class MyObject(Resource):
 
     def post(self):
       new_myobject = request.json  # access the json client
-      myobject_collection = app.db.myobjects  # access the collection to store the new object
+      myobject_collection = app.db.myobjects  # create collection to store the new object
       result = myobject_collection.insert_one(request.json)  # insert the json document into collection for the results
-
       myobject = myobject_collection.find_one({"_id": ObjectId(result.inserted_id)})  # use the result to fetch the inserted documents
 
       return myobject  # return the selected documents
 
     def get(self, myobject_id):  # to read info from data
-      myobject_collection = app.db.myobjects
-      myobject = myobject_collection.find_one({"_id": ObjectId(myobject_id)})
-
-      if myobject is None:
+      myobject_collection = app.db.myobjects  # reference the database from which the client is requesting
+      myobject = myobject_collection.find_one({"_id": ObjectId(myobject_id)})  # create a query (search) based on the object_id
+      if myobject is None:  # if we can't the documents
         response = jsonify(data=[])
-        response.status_code = 404
+        response.status_code = 404  # return error
         return response
-      else:
-        return myobject
+      else:  # if we can find the documents
+        return myobject  # return it to the client
 
 # Add REST resource to API
 api.add_resource(MyObject, '/myobject/','/myobject/<string:myobject_id>')
