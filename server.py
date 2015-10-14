@@ -5,24 +5,24 @@ from bson.objectid import ObjectId
 from utils.mongo_json_encoder import JSONEncoder
 
 # Basic Setup
-app = Flask(__name__)
-mongo = MongoClient('localhost', 27017)
-app.db = mongo.develop_database
-api = Api(app)
+app = Flask(__name__)  # created flask instance and assign it to the app var
+mongo = MongoClient('localhost', 27017)  # establish a connection to our MongoDB service that's running locally
+app.db = mongo.develop_database  # specify a particular database (develop_database) to store data.
+api = Api(app)  # create an instance of the flask_restful API
 
-#Implement REST Resource
+# Implement REST Resource
 class MyObject(Resource):
 
     def post(self):
-      new_myobject = request.json
-      myobject_collection = app.db.myobjects
-      result = myobject_collection.insert_one(request.json)
+      new_myobject = request.json  # access the json client
+      myobject_collection = app.db.myobjects  # access the collection to store the new object
+      result = myobject_collection.insert_one(request.json)  # insert the json document into collection for the results
 
-      myobject = myobject_collection.find_one({"_id": ObjectId(result.inserted_id)})
+      myobject = myobject_collection.find_one({"_id": ObjectId(result.inserted_id)})  # use the result to fetch the inserted documents
 
-      return myobject
+      return myobject  # return the selected documents
 
-    def get(self, myobject_id):
+    def get(self, myobject_id):  # to read info from data
       myobject_collection = app.db.myobjects
       myobject = myobject_collection.find_one({"_id": ObjectId(myobject_id)})
 
