@@ -4,6 +4,7 @@ import json
 import base64
 from pymongo import MongoClient
 
+
 db = None
 
 
@@ -29,9 +30,9 @@ class FlaskrTestCase(unittest.TestCase):
         # Drop collection (significantly faster than dropping entire db)
         self.app.post('/user/',
                       data=json.dumps(dict(
-                          username="user",
+                        username="user",
                           password="password"
-                      )),
+                          )),
                       content_type='application/json')
 
     # User tests

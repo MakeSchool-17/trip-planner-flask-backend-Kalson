@@ -16,14 +16,14 @@ app.bcrypt_rounds = 12
 
 
 def check_auth(username, password):
-    user_collection = app.db.users
-    user = user_collection.find_one({'username': username})
+    user_collection = app.db.users  # references the database for users
+    user = user_collection.find_one({'username': username})  # find a user
 
-    if user is None:
+    if user is None:  # if there is no user
         return False
-    else:
+    else:  # if there is a user
         # check if the hash we generate based on auth matches stored hash
-        encodedPassword = password.encode('utf-8')
+        encodedPassword = password.encode('utf-8')  # encode user with pw
         if bcrypt.hashpw(encodedPassword,
                          user['password']) == user['password']:
             return True
@@ -31,10 +31,11 @@ def check_auth(username, password):
             return False
 
 
-def requires_auth(f):
+def requires_auth(f):  # checks authenication of incoming request
     @wraps(f)
     def decorated(*args, **kwargs):
-        auth = request.authorization
+        auth = request.authorization  # reads the authenication header
+        # checks if the user credentials provided are valid
         if not auth or not check_auth(auth.username, auth.password):
             return ({'error': 'Basic Auth Required.'}, 401, None)
         return f(*args, **kwargs)
@@ -50,19 +51,19 @@ class User(Resource):
                         400,
                         None)
 
-        user_collection = app.db.users
+        user_collection = app.db.users  # references the database for users
         user = user_collection.find_one({'username': request.json['username']})
 
         if user is not None:  # if there is a user
             return ({'error': 'Username already in use'}, 400, None)
-        else:
+        else:  # if there is no user, create with encrpted password
             encodedPassword = request.json['password'].encode('utf-8')
             hashed = bcrypt.hashpw(
                 encodedPassword, bcrypt.gensalt(app.bcrypt_rounds))
             request.json['password'] = hashed
             user_collection.insert_one(request.json)
 
-    @requires_auth
+    @requires_auth  # decorater - if authorized, run get
     def get(self):
         return (None, 200, None)
 
@@ -70,7 +71,7 @@ class User(Resource):
 # Implement REST Resource
 class Trip(Resource):
 
-    @requires_auth
+    @requires_auth   # checks authenication of incoming request
     def get(self, trip_id=None):   # to read info from data
         if trip_id is None:  # if there is no trip
             trip_collection = app.db.trips  # reference the database from which the client is requesting
@@ -128,7 +129,7 @@ class Trip(Resource):
         return {"tripIdentifier": trip_id}
 
 # Add REST resource to API
-# what are the endpoints?
+# The endpoints for User and Trips
 api.add_resource(Trip, '/trip/', '/trip/<string:trip_id>')
 api.add_resource(User, '/user/')
 
