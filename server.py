@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from utils.mongo_json_encoder import JSONEncoder
 from functools import wraps
-import bcrypt
+import bcrypt  # make sure the install this library for the module to work
 
 
 # Basic Setup
