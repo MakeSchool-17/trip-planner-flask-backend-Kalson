@@ -12,7 +12,7 @@ app = Flask(__name__)  # created flask instance and assign it to the app var
 mongo = MongoClient('localhost', 27017)  # establish a connection to our MongoDB service that's running locally
 app.db = mongo.develop_database  # specify a particular database (develop_database) to store data.
 api = Api(app)  # create an instance of the flask_restful API
-app.bcrypt_rounds = 12
+app.bcrypt_rounds = 12  # work factor for the hash
 
 
 def check_auth(username, password):
@@ -24,10 +24,11 @@ def check_auth(username, password):
     else:  # if there is a user
         # check if the hash we generate based on auth matches stored hash
         encodedPassword = password.encode('utf-8')  # encode user with pw
+        # if the bcrypt pw matches with the un encrypted pw 
         if bcrypt.hashpw(encodedPassword,
                          user['password']) == user['password']:
             return True
-        else:
+        else:  # if the bcrypt pw does not match
             return False
 
 
@@ -56,8 +57,9 @@ class User(Resource):
 
         if user is not None:  # if there is a user
             return ({'error': 'Username already in use'}, 400, None)
-        else:  # if there is no user, create with encrpted password
+        else:  # if there is no user, create with password
             encodedPassword = request.json['password'].encode('utf-8')
+            # encrypt the password
             hashed = bcrypt.hashpw(
                 encodedPassword, bcrypt.gensalt(app.bcrypt_rounds))
             request.json['password'] = hashed
